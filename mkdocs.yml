@@ -1,0 +1,32 @@
+# Project information
+site_name: Container Workload Insights
+site_description: Insights about the the APPUiO workload
+site_url: https://github.com/vshn/container-workload-insights
+
+# Repository
+repo_name: Awesome Open Source
+repo_url: https://github.com/vshn/container-workload-insights
+
+
+theme:
+    name: material
+    language: en
+
+# Disable edit uri to get a cleaner view
+edit_uri: ''
+
+extra:
+    social:
+        - { type: 'github', link: 'https://github.com/vshn/container-workload-insights' }
+
+extra_css:
+    - css/extra.css
+
+extra_javascript:
+    - js/autoexpand.js
+
+nav:
+    - Welcome: index.md
+
+
+

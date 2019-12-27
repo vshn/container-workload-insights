@@ -1,0 +1,30 @@
+# This is an openpipe pipeline, for more details check:
+#   https://www.openpipe.org/
+
+start:
+    # Get all output filenames
+    - read from file list: output/node*.json
+
+    # Process each file
+    - iterate:
+    - read from file: $_$
+
+    # Content is always a list, process each list element
+    - iterate:
+
+    # Some processes have partial information because they terminate during collection, discard such cases
+    - select: $'status' in _ and 'exe' in _ and 'cmdline' in _$
+    - merge:
+        # Extract the process uid from the process status (first field after "Uid:")
+        uid: $int([x.split('\t')[1] for x in status if 'Uid:' in x][0])$
+
+    # Select only for openshift provided user ids (grep uidAllocatorRange /etc/origin/master/master-config.yaml)
+    - select: $uid >= 1000000000$
+
+    - insert:
+        basecmd: "$cmdline[0]$"
+        exebin: "$exe.split('/')[-1]$"
+        fullcmd: $ " ".join(cmdline)$
+    - queue: 0
+    - write to file: output/relevant.json
+    - print: Exported info for $len(_)$ relevant processe(s).

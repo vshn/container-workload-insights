@@ -1,0 +1,12 @@
+{
+    "files.exclude": {
+        "site/*": true,
+        "docs/**.md": true,
+        "output/": true
+    },
+    "search.exclude": {
+        "site/*": true,
+        "docs/**.md": true,
+        "output/": true
+    }
+}

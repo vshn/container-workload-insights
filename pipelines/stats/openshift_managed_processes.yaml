@@ -2,8 +2,13 @@
 #   https://www.openpipe.org/
 
 start:
+    - insert:
+        input_dir: $arguments[0]$
+
     # Get all output filenames
-    - read from file list: output/node*.json
+    - read from file list: $input_dir$/node*.json
+    - tag:
+        node_count: $len(_)$
 
     # Process each file
     - iterate:
@@ -27,4 +32,12 @@ start:
         fullcmd: $ " ".join(cmdline)$
     - queue: 0
     - write to file: output/relevant.json
-    - print: Exported info for $len(_)$ relevant processe(s).
+    - insert:
+        proc_total: $len(_)$
+        nodes_total: $_tag.node_count$
+    - print: Exported info for $proc_total$ relevant processe(s) from $nodes_total$ node(s).
+    - transform from jinja:
+        template:
+            docs.in/index.md
+        single_item: True
+    - write to file: docs/index.md

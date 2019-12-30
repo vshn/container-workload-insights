@@ -25,7 +25,6 @@ generate pie:
     - update:
         set: { tech: Other }
         where: $id_count < 100$
-    - pprint:
     # Regroup to summarize "Others"
     - group by stats:
         keys: [tech]
@@ -48,9 +47,10 @@ generate table:
         descendent: True
     - queue: 0
     - insert:
-        web_servers: $_$
+        tech_title: Web ServerX
+        items: $_$
     - transform from jinja:
         template:
-            docs.in/webservers.md
+            docs.in/table.md
         single_item: True
     - write to file: docs/webservers.md

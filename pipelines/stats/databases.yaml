@@ -1,5 +1,4 @@
 start:
-    - print: Databases
     - read from file: output/relevant.json
     - iterate:
     - update using case replace:
@@ -20,7 +19,25 @@ start:
     - sort:
         key: id_count
         descendent: True
-    - transform using terminaltables:
-        header: [Technology, Count]
-        keys: [tech, id_count]
-    - print:
+    - queue: 0
+
+    - send to segment:
+        - generate pie
+        - generate table
+
+generate pie:
+    - transform from matplotlib pie:
+        label_key: tech
+        value_key: id_count
+        path: docs/images/databases.png
+
+generate table:
+    - insert:
+        tech_title: Database
+        items: $_$
+        pie_name: databases
+    - transform from jinja:
+        template:
+            docs.in/core_info.md
+        single_item: True
+    - write to file: docs/databases.md

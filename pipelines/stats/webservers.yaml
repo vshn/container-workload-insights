@@ -47,10 +47,11 @@ generate table:
         descendent: True
     - queue: 0
     - insert:
-        tech_title: Web ServerX
+        tech_title: Web Server
         items: $_$
+        pie_name: webservers
     - transform from jinja:
         template:
-            docs.in/table.md
+            docs.in/core_info.md
         single_item: True
     - write to file: docs/webservers.md

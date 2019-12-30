@@ -28,5 +28,6 @@ extra_javascript:
 nav:
     - Welcome: index.md
     - Databases: databases.md
+    - Programming Languages: languages.md
     - Web Servers: webservers.md
 

@@ -1,5 +1,4 @@
 start:
-  - print: Languages
   - read from file: output/relevant.json
   - iterate:
   - update using case replace:
@@ -24,16 +23,44 @@ start:
   - update: { set: {id: 0} } # Dummy number for stats aggregation
 
   - group by stats:
-      keys: [tech]
-      stats: [id]
+          keys: [tech]
+          stats: [id]
+
   - sort:
       key: id_count
       descendent: True
-  - transform using terminaltables:
-      header: [Technology, Count]
-      keys: [tech, id_count]
-  - print:
+  - queue: 0
 
+  - send to segment:
+      - generate pie
+      - generate table
 
+generate pie:
+    # Groups < 100 units will go into "Others"
+    - iterate:
+    - update:
+        set: { tech: Other }
+        where: $id_count < 100$
+    # Regroup to summarize "Others"
+    - group by stats:
+        keys: [tech]
+        stats: [id_count]
+    - sort:
+        key: id_count_sum
+        descendent: True
+    - queue: 0
+    - transform from matplotlib pie:
+        label_key: tech
+        value_key: id_count_sum
+        path: docs/images/languages.png
 
-
+generate table:
+    - insert:
+        tech_title: Language
+        items: $_$
+        pie_name: languages
+    - transform from jinja:
+        template:
+            docs.in/core_info.md
+        single_item: True
+    - write to file: docs/languages.md

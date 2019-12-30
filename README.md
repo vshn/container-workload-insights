@@ -9,6 +9,7 @@ The data required to produce the insights must be collected using the [process-i
 ## Generate pages
 ```
 openpipe run pipelines/stats/openshift_managed_processes.yaml ../appuio-workload-insights/pic/output/
+scripts/generate.sh
 ```
 
 ## Docker build

@@ -1,66 +1,26 @@
 start:
-  - read from file: output/relevant.json
-  - iterate:
-  - update using case replace:
-      tech:
-        Ruby: $ exebin == 'ruby' $
-        PHP: $ exebin in ['php', 'php-fpm'] $
-        Node: $ exebin == 'node'
-              or 'node server.js' in fullcmd
-              or 'npm start' in fullcmd
-              or '-c node' in fullcmd
-              $
-        PHP: $ exebin in ['php', 'php-fpm'] $
-        Elixir: $ "iex " in fullcmd $
-        Python: $
-          'python' in exebin
-          or "-c python " in fullcmd
-          or "python -m " in fullcmd
-          $
-        Java: $ basecmd == 'java' or exebin == "java" $
-        Other: True
-
-  - update: { set: {id: 0} } # Dummy number for stats aggregation
-
-  - group by stats:
-          keys: [tech]
-          stats: [id]
-
-  - sort:
-      key: id_count
-      descendent: True
-  - queue: 0
-
-  - send to segment:
-      - generate pie
-      - generate table
-
-generate pie:
-    # Groups < 100 units will go into "Others"
+    - read from file: output/relevant.json
     - iterate:
-    - update:
-        set: { tech: Other }
-        where: $id_count < 100$
-    # Regroup to summarize "Others"
-    - group by stats:
-        keys: [tech]
-        stats: [id_count]
-    - sort:
-        key: id_count_sum
-        descendent: True
-    - queue: 0
-    - transform from matplotlib pie:
-        label_key: tech
-        value_key: id_count_sum
-        path: docs/images/languages.png
-
-generate table:
-    - insert:
-        tech_title: Language
-        items: $_$
-        pie_name: languages
-    - transform from jinja:
-        template:
-            docs.in/core_info.md
-        single_item: True
-    - write to file: docs/languages.md
+    - update using case replace:
+        tech:
+            Ruby: $ exebin == 'ruby' $
+            PHP: $ exebin in ['php', 'php-fpm'] $
+            Node: $ exebin == 'node'
+                or 'node server.js' in fullcmd
+                or 'npm start' in fullcmd
+                or '-c node' in fullcmd
+                $
+            PHP: $ exebin in ['php', 'php-fpm'] $
+            Elixir: $ "iex " in fullcmd $
+            Python: $
+                'python' in exebin
+                or "-c python " in fullcmd
+                or "python -m " in fullcmd
+                $
+            Java: $ basecmd == 'java' or exebin == "java" $
+            Other: True
+    - tag:
+        tech: Languages
+        short_name: languages
+        other_max: 100
+    - send to pipeline: pipelines/stats/core_stats.yaml

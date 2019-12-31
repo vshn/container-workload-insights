@@ -9,49 +9,9 @@ start:
             HAProxy: $ exebin == 'haproxy' or 'sbin/haproxy' in fullcmd $
             Nginx: $ exebin == 'nginx' $
             Daphne: $ 'daphne' in fullcmd $
-
-    - select: $'tech' in _$
-
-    - update: { set: { id: 0 } } # Dummy number for stats aggregation
-    - send to segment:
-        - generate pie
-        - generate table
-
-generate pie:
-    - group by stats:
-        keys: [tech]
-        stats: [id]
-    # Groups < 100 units will go into "Others"
-    - update:
-        set: { tech: Other }
-        where: $id_count < 100$
-    # Regroup to summarize "Others"
-    - group by stats:
-        keys: [tech]
-        stats: [id_count]
-    - sort:
-        key: id_count_sum
-        descendent: True
-    - queue: 0
-    - transform from matplotlib pie:
-        label_key: tech
-        value_key: id_count_sum
-        path: docs/images/webservers.png
-
-generate table:
-    - group by stats:
-        keys: [tech]
-        stats: [id]
-    - sort:
-        key: id_count
-        descendent: True
-    - queue: 0
-    - insert:
-        tech_title: Web Server
-        items: $_$
-        pie_name: webservers
-    - transform from jinja:
-        template:
-            docs.in/core_info.md
-        single_item: True
-    - write to file: docs/webservers.md
+            Other: True
+    - tag:
+        tech: Web Server
+        short_name: webservers
+        other_max: 100
+    - send to pipeline: pipelines/stats/core_stats.yaml

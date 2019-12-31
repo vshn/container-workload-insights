@@ -1,0 +1,57 @@
+start:
+
+    - update: { set: { id: 0 } } # Dummy number for stats aggregation
+    - group by stats:
+            keys: [tech]
+            stats: [id]
+    - sort:
+        key: id_count
+        descendent: True
+    - send to segment:
+        - generate table
+        - generate_other_max
+    # If 'other_max' is set, nothing else will be done
+    # Otherwise we will generate the pie chart
+    - select: $ not 'other_max' in _tag.keys() $
+    - queue: 0
+    - send to segment:
+        - generate pie
+
+generate_other_max:
+    # When 'other_max' is set, small groups will be aggegated
+    # into "Other" to improve the pie chart readability
+    - select: $ 'other_max' in _tag.keys() $
+    - update:
+        set: { tech: Other }
+        where: $id_count < _tag.other_max$
+    # Regroup to summarize "Others"
+    - group by stats:
+        keys: [tech]
+        stats: [id_count]
+    - sort:
+        key: id_count_sum
+        descendent: True
+    - update:
+        set:
+            id_count: $id_count_sum$
+    - queue: 0
+    - send to segment:
+        - generate pie
+
+generate pie:
+    - transform from matplotlib pie:
+        label_key: tech
+        value_key: id_count
+        path: docs/images/$_tag.short_name$.png
+
+generate table:
+    - queue: 0
+    - insert:
+        tech_title: $_tag.tech$
+        items: $_$
+        pie_name: $_tag.short_name$
+    - transform from jinja:
+        template:
+            docs.in/core_info.md
+        single_item: True
+    - write to file: docs/$_tag.short_name$.md

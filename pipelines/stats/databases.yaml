@@ -10,34 +10,7 @@ start:
             memcached: $exebin == 'memcached'$
             Other: True
     - select: $tech != "Other"$
-
-    - update: { set: { id: 0 } } # Dummy number for stats aggregation
-
-    - group by stats:
-            keys: [tech]
-            stats: [id]
-    - sort:
-        key: id_count
-        descendent: True
-    - queue: 0
-
-    - send to segment:
-        - generate pie
-        - generate table
-
-generate pie:
-    - transform from matplotlib pie:
-        label_key: tech
-        value_key: id_count
-        path: docs/images/databases.png
-
-generate table:
-    - insert:
-        tech_title: Database
-        items: $_$
-        pie_name: databases
-    - transform from jinja:
-        template:
-            docs.in/core_info.md
-        single_item: True
-    - write to file: docs/databases.md
+    - tag:
+        tech: Database
+        short_name: databases
+    - send to pipeline: pipelines/stats/core_stats.yaml

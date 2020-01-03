@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insights-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: workload-insights
+  template:
+    metadata:
+      labels:
+        app: workload-insights
+    spec:
+      containers:
+      - name: workload-insights
+        image: docker-registry.default.svc:5000/container-workload-insights/container-workload-insights:latest
+        ports:
+        - containerPort: 8080

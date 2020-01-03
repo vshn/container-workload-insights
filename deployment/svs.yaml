@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-insights
+spec:
+  selector:
+    app: workload-insights
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -24,6 +24,6 @@ docker build -t container-workload-insights .
 docker run \
     -dit \
     --name container-workload-insights \
-    -p 8080:80 \
+    -p 8080:8080 \
     container-workload-insights
 ````

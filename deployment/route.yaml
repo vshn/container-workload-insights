@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Route
+metadata:
+  name: container-workload-insights
+spec:
+  host: container-workload-insights.appuioapp.ch
+  to:
+    kind: Service
+    name: workload-insights
